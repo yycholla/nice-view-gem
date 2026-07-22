@@ -10,4 +10,5 @@ struct battery_status_state {
 #endif
 };
 
-void draw_battery_status(lv_obj_t *canvas, const struct status_state *state);
+void draw_battery_line(lv_obj_t *canvas, const struct status_state *state, int offset,
+                       int edge_len);

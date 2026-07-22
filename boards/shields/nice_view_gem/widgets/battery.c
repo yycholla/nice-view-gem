@@ -1,40 +1,23 @@
 #include <zephyr/kernel.h>
 #include "battery.h"
-#include "../assets/custom_fonts.h"
 
-LV_IMG_DECLARE(bolt);
+/* Battery as an unlabeled thin line along the top edge of the landscape
+ * screen (portrait x=0 column, which the 90deg CW canvas rotation maps to
+ * the top row). Fills left-to-right: full charge spans the whole 160px
+ * edge. Each canvas draws its own slice; LVGL clips the overflow. */
+void draw_battery_line(lv_obj_t *canvas, const struct status_state *state, int offset,
+                       int edge_len) {
+    lv_draw_rect_dsc_t rect_fg_dsc;
+    init_rect_dsc(&rect_fg_dsc, LVGL_FOREGROUND);
 
-static void draw_level(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_right_dsc;
-    init_label_dsc(&label_right_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_RIGHT);
+    int len = (state->battery * edge_len) / 100;
+    /* left edge of landscape = high virtual y; grow toward the right */
+    int y_start = edge_len - len;
 
-    char text[10] = {};
+    lv_canvas_draw_rect(canvas, 0, y_start + offset, 2, len, &rect_fg_dsc);
 
-    sprintf(text, "%i%%", state->battery);
-    lv_canvas_draw_text(canvas, 26, 19, 42, &label_right_dsc, text);
-}
-
-static void draw_charging_level(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_img_dsc_t img_dsc;
-    lv_draw_img_dsc_init(&img_dsc);
-    lv_draw_label_dsc_t label_right_dsc;
-    init_label_dsc(&label_right_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_RIGHT);
-
-    char text[10] = {};
-
-    sprintf(text, "%i%%", state->battery);
-    lv_canvas_draw_text(canvas, 26, 19, 35, &label_right_dsc, text);
-    lv_canvas_draw_img(canvas, 62, 21, &bolt, &img_dsc);
-}
-
-void draw_battery_status(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_left_dsc;
-    init_label_dsc(&label_left_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
-    lv_canvas_draw_text(canvas, 0, 19, 25, &label_left_dsc, "BAT");
-
+    /* charging: 1px full-length rail so the level line visibly sits on it */
     if (state->charging) {
-        draw_charging_level(canvas, state);
-    } else {
-        draw_level(canvas, state);
+        lv_canvas_draw_rect(canvas, 0, 0 + offset, 1, edge_len, &rect_fg_dsc);
     }
 }

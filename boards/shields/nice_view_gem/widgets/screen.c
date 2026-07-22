@@ -7,23 +7,24 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
+#include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
-#include <zmk/events/wpm_state_changed.h>
+#include <zmk-leader-key/events/leader_state_changed.h>
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/endpoints.h>
+#include <zmk/hid.h>
 #include <zmk/keymap.h>
 #include <zmk/usb.h>
-#include <zmk/wpm.h>
 
+#include "activity.h"
 #include "battery.h"
 #include "layer.h"
 #include "output.h"
 #include "profile.h"
 #include "screen.h"
-#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -35,11 +36,9 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     fill_background(canvas);
 
-    // Draw widgets
     draw_output_status(canvas, state);
-    draw_battery_status(canvas, state);
+    draw_battery_line(canvas, state, 0, 160);
 
-    // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
 
@@ -47,10 +46,9 @@ static void draw_middle(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     lv_obj_t *canvas = lv_obj_get_child(widget, 1);
     fill_background(canvas);
 
-    // Draw widgets
-    draw_wpm_status(canvas, state);
+    draw_activity_status(canvas, state);
+    draw_battery_line(canvas, state, BUFFER_OFFSET_MIDDLE, 160);
 
-    // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
 
@@ -58,12 +56,17 @@ static void draw_bottom(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     lv_obj_t *canvas = lv_obj_get_child(widget, 2);
     fill_background(canvas);
 
-    // Draw widgets
     draw_profile_status(canvas, state);
     draw_layer_status(canvas, state);
+    draw_battery_line(canvas, state, BUFFER_OFFSET_BOTTOM, 160);
 
-    // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
+}
+
+static void draw_all(struct zmk_widget_screen *widget) {
+    draw_top(widget->obj, widget->cbuf, &widget->state);
+    draw_middle(widget->obj, widget->cbuf2, &widget->state);
+    draw_bottom(widget->obj, widget->cbuf3, &widget->state);
 }
 
 /**
@@ -77,7 +80,8 @@ static void set_battery_status(struct zmk_widget_screen *widget,
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
     widget->state.battery = state.level;
 
-    draw_top(widget->obj, widget->cbuf, &widget->state);
+    /* the battery line spans all three canvases */
+    draw_all(widget);
 }
 
 static void battery_status_update_cb(struct battery_status_state state) {
@@ -171,30 +175,108 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
 /**
- * WPM status
+ * Modifier status
  **/
 
-static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
-    for (int i = 0; i < 9; i++) {
-        widget->state.wpm[i] = widget->state.wpm[i + 1];
+struct mods_status_state {
+    uint8_t mods;
+};
+
+static void set_mods_status(struct zmk_widget_screen *widget, struct mods_status_state state) {
+    if (widget->state.mods == state.mods) {
+        return;
     }
-    widget->state.wpm[9] = state.wpm;
+    widget->state.mods = state.mods;
 
     draw_middle(widget->obj, widget->cbuf2, &widget->state);
 }
 
-static void wpm_status_update_cb(struct wpm_status_state state) {
+static void mods_status_update_cb(struct mods_status_state state) {
     struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status(widget, state); }
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_mods_status(widget, state); }
 }
 
-struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
-    return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
+static struct mods_status_state mods_status_get_state(const zmk_event_t *eh) {
+    return (struct mods_status_state){.mods = zmk_hid_get_explicit_mods()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_mods_status, struct mods_status_state, mods_status_update_cb,
+                            mods_status_get_state)
+ZMK_SUBSCRIPTION(widget_mods_status, zmk_keycode_state_changed);
+
+/**
+ * Leader status
+ **/
+
+struct leader_status_state {
+    bool active;
+    uint8_t count;
+    uint8_t cand_len;
+    char cands[13];
 };
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
-                            wpm_status_get_state)
-ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
+/* HID keyboard-page usage id -> display glyph */
+static char keycode_to_char(uint16_t id) {
+    if (id >= 0x04 && id <= 0x1D) {
+        return 'A' + (id - 0x04);
+    }
+    if (id >= 0x1E && id <= 0x26) {
+        return '1' + (id - 0x1E);
+    }
+    switch (id) {
+    case 0x27:
+        return '0';
+    case 0x36:
+        return ',';
+    case 0x37:
+        return '.';
+    case 0x38:
+        return '/';
+    case 0x2C:
+        return '_'; /* space */
+    default:
+        return '?';
+    }
+}
+
+static void set_leader_status(struct zmk_widget_screen *widget, struct leader_status_state state) {
+    widget->state.leader_active = state.active;
+    widget->state.leader_count = state.count;
+    widget->state.leader_cand_len = state.cand_len;
+    memcpy(widget->state.leader_cands, state.cands, sizeof(state.cands));
+
+    draw_middle(widget->obj, widget->cbuf2, &widget->state);
+}
+
+static void leader_status_update_cb(struct leader_status_state state) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_leader_status(widget, state); }
+}
+
+static struct leader_status_state leader_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_leader_state_changed *ev = as_zmk_leader_state_changed(eh);
+    struct leader_status_state state = {};
+
+    if (ev == NULL) {
+        return state;
+    }
+
+    state.active = ev->active;
+    state.count = ev->press_count;
+    int n = ev->num_candidates;
+    if (n > 12) {
+        n = 12;
+    }
+    for (int i = 0; i < n; i++) {
+        state.cands[i] = keycode_to_char(ev->candidates[i]);
+    }
+    state.cand_len = n;
+    return state;
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_leader_status, struct leader_status_state,
+                            leader_status_update_cb, leader_status_get_state)
+ZMK_SUBSCRIPTION(widget_leader_status, zmk_leader_state_changed);
 
 /**
  * Initialization
@@ -220,7 +302,8 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_battery_status_init();
     widget_layer_status_init();
     widget_output_status_init();
-    widget_wpm_status_init();
+    widget_mods_status_init();
+    widget_leader_status_init();
 
     return 0;
 }
