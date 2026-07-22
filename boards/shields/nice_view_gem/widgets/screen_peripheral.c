@@ -30,7 +30,7 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
 
     // Draw widgets
     draw_output_status(canvas, state);
-    draw_battery_line(canvas, state, 0, BUFFER_SIZE);
+    draw_battery_line(canvas, state);
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);

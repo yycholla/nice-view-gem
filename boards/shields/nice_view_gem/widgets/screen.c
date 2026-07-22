@@ -37,7 +37,7 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
     fill_background(canvas);
 
     draw_output_status(canvas, state);
-    draw_battery_line(canvas, state, 0, 160);
+    draw_battery_line(canvas, state);
 
     rotate_canvas(canvas, cbuf);
 }
@@ -47,7 +47,6 @@ static void draw_middle(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     fill_background(canvas);
 
     draw_activity_status(canvas, state);
-    draw_battery_line(canvas, state, BUFFER_OFFSET_MIDDLE, 160);
 
     rotate_canvas(canvas, cbuf);
 }
@@ -58,15 +57,8 @@ static void draw_bottom(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 
     draw_profile_status(canvas, state);
     draw_layer_status(canvas, state);
-    draw_battery_line(canvas, state, BUFFER_OFFSET_BOTTOM, 160);
 
     rotate_canvas(canvas, cbuf);
-}
-
-static void draw_all(struct zmk_widget_screen *widget) {
-    draw_top(widget->obj, widget->cbuf, &widget->state);
-    draw_middle(widget->obj, widget->cbuf2, &widget->state);
-    draw_bottom(widget->obj, widget->cbuf3, &widget->state);
 }
 
 /**
@@ -80,8 +72,7 @@ static void set_battery_status(struct zmk_widget_screen *widget,
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
     widget->state.battery = state.level;
 
-    /* the battery line spans all three canvases */
-    draw_all(widget);
+    draw_top(widget->obj, widget->cbuf, &widget->state);
 }
 
 static void battery_status_update_cb(struct battery_status_state state) {

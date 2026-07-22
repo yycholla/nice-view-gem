@@ -52,24 +52,18 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
         lv_canvas_draw_rect(canvas, 36 + i * 6, LDR_Y + 4, 3, 3, &fg_rect);
     }
 
-    /* candidate next keys, up to two rows of six, space-separated */
+    /* candidate next keys, packed, up to two rows of six */
     int n = state->leader_cand_len;
     int first = n > 6 ? 6 : n;
-    char spaced[16] = {0};
-    for (int i = 0; i < first; i++) {
-        spaced[i * 2] = state->leader_cands[i];
-        spaced[i * 2 + 1] = ' ';
-    }
-    lv_canvas_draw_text(canvas, 0, CAND_Y1, 68, &fg_left, spaced);
+    char row[8] = {0};
+    memcpy(row, state->leader_cands, first);
+    lv_canvas_draw_text(canvas, 0, CAND_Y1, 68, &fg_left, row);
 
     if (n > 6) {
-        memset(spaced, 0, sizeof(spaced));
         int second = (n - 6) > 6 ? 6 : (n - 6);
-        for (int i = 0; i < second; i++) {
-            spaced[i * 2] = state->leader_cands[6 + i];
-            spaced[i * 2 + 1] = ' ';
-        }
-        lv_canvas_draw_text(canvas, 0, CAND_Y2, 68, &fg_left, spaced);
+        memset(row, 0, sizeof(row));
+        memcpy(row, &state->leader_cands[6], second);
+        lv_canvas_draw_text(canvas, 0, CAND_Y2, 68, &fg_left, row);
     }
 }
 
