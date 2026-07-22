@@ -7,6 +7,7 @@ LV_IMG_DECLARE(bongo_casualleft);
 LV_IMG_DECLARE(bongo_casualright);
 LV_IMG_DECLARE(bongo_furiousup);
 LV_IMG_DECLARE(bongo_furiousdown);
+LV_IMG_DECLARE(bongo_resting);
 
 /* Middle canvas (virtual y 44..112): held-modifier indicators and the
  * leader-key readout, replacing the WPM gauge/chart. */
@@ -77,34 +78,6 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
     }
 }
 
-/* idle art: a little procedural sea urchin, body + spikes, no assets */
-static void draw_urchin(lv_obj_t *canvas) {
-    int cx = 34;
-    int cy = 86 + BUFFER_OFFSET_MIDDLE;
-    int body_r = 9;
-
-    lv_draw_rect_dsc_t body_dsc;
-    init_rect_dsc(&body_dsc, LVGL_FOREGROUND);
-    body_dsc.radius = LV_RADIUS_CIRCLE;
-    lv_canvas_draw_rect(canvas, cx - body_r, cy - body_r, body_r * 2, body_r * 2, &body_dsc);
-
-    lv_draw_line_dsc_t spike_dsc;
-    init_line_dsc(&spike_dsc, LVGL_FOREGROUND, 1);
-    for (int i = 0; i < 16; i++) {
-        float a = i * (2.0f * 3.14159f / 16.0f);
-        int len = (i % 2) ? 16 : 11; /* alternating long/short spikes */
-        lv_point_t pts[2] = {
-            {cx + (int)((body_r - 2) * cosf(a)), cy + (int)((body_r - 2) * sinf(a))},
-            {cx + (int)(len * cosf(a)), cy + (int)(len * sinf(a))},
-        };
-        lv_canvas_draw_line(canvas, pts, 2, &spike_dsc);
-    }
-
-    /* eye-catch highlight */
-    lv_draw_rect_dsc_t bg_dsc;
-    init_rect_dsc(&bg_dsc, LVGL_BACKGROUND);
-    lv_canvas_draw_rect(canvas, cx - 4, cy - 4, 2, 2, &bg_dsc);
-}
 
 /* bongo cat taps in sync with real keypresses; WPM only sets intensity */
 static void draw_bongo(lv_obj_t *canvas, const struct status_state *state) {
@@ -128,6 +101,9 @@ void draw_activity_status(lv_obj_t *canvas, const struct status_state *state) {
     } else if (state->wpm > 0) {
         draw_bongo(canvas, state);
     } else {
-        draw_urchin(canvas);
+        /* idle: cat asleep at its desk */
+        lv_draw_img_dsc_t img_dsc;
+        lv_draw_img_dsc_init(&img_dsc);
+        lv_canvas_draw_img(canvas, 0, 66 + BUFFER_OFFSET_MIDDLE, &bongo_resting, &img_dsc);
     }
 }
