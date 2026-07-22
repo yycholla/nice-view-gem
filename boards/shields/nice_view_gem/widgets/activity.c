@@ -15,6 +15,10 @@ static const char mod_letters[4] = {'S', 'C', 'A', 'G'};
 static const uint8_t mod_masks[4] = {0x22, 0x11, 0x44, 0x88};
 
 static void draw_mods(lv_obj_t *canvas, const struct status_state *state) {
+    /* blank unless something is held; fixed slots so glances stay learnable */
+    if (state->mods == 0) {
+        return;
+    }
     lv_draw_label_dsc_t fg_text;
     init_label_dsc(&fg_text, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_CENTER);
     lv_draw_label_dsc_t bg_text;
