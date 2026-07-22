@@ -10,6 +10,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/events/wpm_state_changed.h>
 #include <zmk-leader-key/events/leader_state_changed.h>
 #include <zmk/battery.h>
 #include <zmk/ble.h>
@@ -18,6 +19,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/hid.h>
 #include <zmk/keymap.h>
 #include <zmk/usb.h>
+#include <zmk/wpm.h>
 
 #include "activity.h"
 #include "battery.h"
@@ -166,20 +168,24 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
 /**
- * Modifier status
+ * Modifier + bongo status (any keypress event)
  **/
 
 struct mods_status_state {
     uint8_t mods;
+    bool pressed;
 };
 
 static void set_mods_status(struct zmk_widget_screen *widget, struct mods_status_state state) {
-    if (widget->state.mods == state.mods) {
-        return;
-    }
+    bool mods_changed = widget->state.mods != state.mods;
     widget->state.mods = state.mods;
-
-    draw_middle(widget->obj, widget->cbuf2, &widget->state);
+    if (state.pressed) {
+        /* bongo paw alternates with real keystrokes */
+        widget->state.bongo_paw = !widget->state.bongo_paw;
+    }
+    if (mods_changed || state.pressed) {
+        draw_middle(widget->obj, widget->cbuf2, &widget->state);
+    }
 }
 
 static void mods_status_update_cb(struct mods_status_state state) {
@@ -188,12 +194,46 @@ static void mods_status_update_cb(struct mods_status_state state) {
 }
 
 static struct mods_status_state mods_status_get_state(const zmk_event_t *eh) {
-    return (struct mods_status_state){.mods = zmk_hid_get_explicit_mods()};
+    const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
+    return (struct mods_status_state){
+        .mods = zmk_hid_get_explicit_mods(),
+        .pressed = (ev != NULL) && ev->state,
+    };
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_mods_status, struct mods_status_state, mods_status_update_cb,
                             mods_status_get_state)
 ZMK_SUBSCRIPTION(widget_mods_status, zmk_keycode_state_changed);
+
+/**
+ * WPM (bongo intensity only)
+ **/
+
+struct wpm_status_state {
+    uint8_t wpm;
+};
+
+static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
+    bool became_idle = (state.wpm == 0) != (widget->state.wpm == 0);
+    widget->state.wpm = state.wpm;
+    if (became_idle) {
+        /* typing started or stopped: swap bongo <-> idle art */
+        draw_middle(widget->obj, widget->cbuf2, &widget->state);
+    }
+}
+
+static void wpm_status_update_cb(struct wpm_status_state state) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status(widget, state); }
+}
+
+static struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
+    return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
+                            wpm_status_get_state)
+ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
 /**
  * Leader status
@@ -294,6 +334,7 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_layer_status_init();
     widget_output_status_init();
     widget_mods_status_init();
+    widget_wpm_status_init();
     widget_leader_status_init();
 
     return 0;

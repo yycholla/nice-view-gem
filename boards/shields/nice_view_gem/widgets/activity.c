@@ -3,6 +3,11 @@
 #include "activity.h"
 #include "../assets/custom_fonts.h"
 
+LV_IMG_DECLARE(bongo_casualleft);
+LV_IMG_DECLARE(bongo_casualright);
+LV_IMG_DECLARE(bongo_furiousup);
+LV_IMG_DECLARE(bongo_furiousdown);
+
 /* Middle canvas (virtual y 44..112): held-modifier indicators and the
  * leader-key readout, replacing the WPM gauge/chart. */
 
@@ -101,11 +106,27 @@ static void draw_urchin(lv_obj_t *canvas) {
     lv_canvas_draw_rect(canvas, cx - 4, cy - 4, 2, 2, &bg_dsc);
 }
 
+/* bongo cat taps in sync with real keypresses; WPM only sets intensity */
+static void draw_bongo(lv_obj_t *canvas, const struct status_state *state) {
+    lv_draw_img_dsc_t img_dsc;
+    lv_draw_img_dsc_init(&img_dsc);
+
+    const lv_img_dsc_t *frame;
+    if (state->wpm >= 60) {
+        frame = state->bongo_paw ? &bongo_furiousup : &bongo_furiousdown;
+    } else {
+        frame = state->bongo_paw ? &bongo_casualleft : &bongo_casualright;
+    }
+    lv_canvas_draw_img(canvas, 0, 66 + BUFFER_OFFSET_MIDDLE, frame, &img_dsc);
+}
+
 void draw_activity_status(lv_obj_t *canvas, const struct status_state *state) {
     if (state->leader_active) {
         draw_leader(canvas, state);
     } else if (state->mods != 0) {
         draw_mods(canvas, state);
+    } else if (state->wpm > 0) {
+        draw_bongo(canvas, state);
     } else {
         draw_urchin(canvas);
     }
