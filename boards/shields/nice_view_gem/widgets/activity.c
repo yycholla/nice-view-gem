@@ -55,13 +55,14 @@ struct ldr_item {
 
 static const struct ldr_item top_items[] = {{'V', "iew"}, {'M', "ove"}, {'T', "ogl"},
                                             {'G', "rp"},  {'J', "j"},   {'C', "lip"},
-                                            {'S', "ys"},  {'W', "in"}};
+                                            {'S', "ys"},  {'W', "in"},  {'P', "ad"}};
 static const struct ldr_item jj_items[] = {
     {'S', "tat"}, {'L', "og"}, {'D', "iff"}, {'N', "ew"}, {'M', "sg"}};
 static const struct ldr_item clip_items[] = {{'Y', "ank"}, {'P', "aste"}};
 static const struct ldr_item sys_items[] = {{'C', "aff"},  {'D', "nd"},   {'N', "ite"},
                                             {'E', "moji"}, {'T', "heme"}, {'L', "ock"}};
 static const struct ldr_item win_items[] = {{'O', "ver"}, {'Z', "oom"}, {'M', "ax"}};
+static const struct ldr_item pad_items[] = {{'K', "itty"}, {'E', "macs"}};
 
 /* one menu row: inverted key cell, then the rest of the word */
 static void draw_ldr_item(lv_obj_t *canvas, int x, int y, const struct ldr_item *item) {
@@ -116,6 +117,11 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
         items = win_items;
         n = 3;
         break;
+    case 'P':
+        header = "PADS";
+        items = pad_items;
+        n = 2;
+        break;
     case 'V':
         header = "VIEW TAG";
         tag_grid = true;
@@ -134,7 +140,7 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
         break;
     default:
         items = top_items;
-        n = 8;
+        n = 9;
         break;
     }
 
@@ -149,9 +155,9 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
         draw_ldr_hint(canvas, y0 + 10, "456 JKL");
         draw_ldr_hint(canvas, y0 + 20, "123 M,.");
     } else if (n > 6) {
-        /* top level: two columns of four */
+        /* top level: two columns of five */
         for (int i = 0; i < n; i++) {
-            draw_ldr_item(canvas, (i / 4) * 36, y0 + (i % 4) * 11, &items[i]);
+            draw_ldr_item(canvas, (i / 5) * 36, y0 + (i % 5) * 11, &items[i]);
         }
     } else {
         for (int i = 0; i < n; i++) {
