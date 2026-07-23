@@ -30,6 +30,7 @@ struct status_state {
     bool bongo_paw;
     bool leader_active;
     char leader_prefix;
+    char leader_prefix2;
     uint8_t leader_count;
     uint8_t leader_cand_len;
     char leader_cands[13];

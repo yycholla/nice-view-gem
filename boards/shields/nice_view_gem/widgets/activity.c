@@ -59,8 +59,10 @@ static const struct ldr_item top_items[] = {{'V', "iew"}, {'M', "ove"}, {'T', "o
 static const struct ldr_item jj_items[] = {
     {'S', "tat"}, {'L', "og"}, {'D', "iff"}, {'N', "ew"}, {'M', "sg"}};
 static const struct ldr_item clip_items[] = {{'Y', "ank"}, {'P', "aste"}};
-static const struct ldr_item sys_items[] = {{'C', "aff"},  {'D', "nd"},   {'N', "ite"},
-                                            {'E', "moji"}, {'T', "heme"}, {'L', "ock"}};
+static const struct ldr_item sys_items[] = {{'C', "aff"},  {'D', "nd"},   {'W', "arm"},
+                                            {'E', "moji"}, {'T', "heme"}, {'L', "ock"},
+                                            {'N', "ix"}};
+static const struct ldr_item nix_items[] = {{'N', "ow"}, {'U', "pdate"}};
 static const struct ldr_item win_items[] = {{'O', "ver"}, {'Z', "oom"}, {'M', "ax"}};
 static const struct ldr_item pad_items[] = {
     {'K', "itty"}, {'E', "macs"}, {'S', "pot"}, {'D', "isc"}};
@@ -109,9 +111,15 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
         n = 2;
         break;
     case 'S':
-        header = "SYSTEM";
-        items = sys_items;
-        n = 6;
+        if (state->leader_count >= 2 && state->leader_prefix2 == 'N') {
+            header = "NIX";
+            items = nix_items;
+            n = 2;
+        } else {
+            header = "SYSTEM";
+            items = sys_items;
+            n = 7;
+        }
         break;
     case 'W':
         header = "WINDOW";
