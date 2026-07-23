@@ -15,6 +15,7 @@ lv_obj_t *zmk_display_status_screen() {
     screen = lv_obj_create(NULL);
 #if IS_ENABLED(CONFIG_NICE_VIEW_WIDGET_INVERTED)
     lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
 #endif
 
 #if IS_ENABLED(CONFIG_NICE_VIEW_WIDGET_STATUS)
