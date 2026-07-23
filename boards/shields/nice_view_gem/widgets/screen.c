@@ -241,6 +241,7 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
 struct leader_status_state {
     bool active;
+    char prefix;
     uint8_t count;
     uint8_t cand_len;
     char cands[13];
@@ -272,6 +273,7 @@ static char keycode_to_char(uint16_t id) {
 
 static void set_leader_status(struct zmk_widget_screen *widget, struct leader_status_state state) {
     widget->state.leader_active = state.active;
+    widget->state.leader_prefix = state.prefix;
     widget->state.leader_count = state.count;
     widget->state.leader_cand_len = state.cand_len;
     memcpy(widget->state.leader_cands, state.cands, sizeof(state.cands));
@@ -293,6 +295,7 @@ static struct leader_status_state leader_status_get_state(const zmk_event_t *eh)
     }
 
     state.active = ev->active;
+    state.prefix = (ev->press_count > 0) ? keycode_to_char(ev->prefix) : 0;
     state.count = ev->press_count;
     int n = ev->num_candidates;
     if (n > 12) {

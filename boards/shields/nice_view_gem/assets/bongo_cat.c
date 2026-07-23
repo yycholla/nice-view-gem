@@ -24,8 +24,13 @@
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_CASUALRIGHT uint8_t bongo_casualright_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -88,8 +93,13 @@ const lv_img_dsc_t bongo_casualright = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_FURIOUSUP uint8_t bongo_furiousup_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -153,8 +163,13 @@ const lv_img_dsc_t bongo_furiousup = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_CASUALLEFT uint8_t bongo_casualleft_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -219,8 +234,13 @@ const lv_img_dsc_t bongo_casualleft = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_EXHALE uint8_t bongo_exhale_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -284,8 +304,13 @@ const lv_img_dsc_t bongo_exhale = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_RESTING uint8_t bongo_resting_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -349,8 +374,13 @@ const lv_img_dsc_t bongo_resting = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_INHALE uint8_t bongo_inhale_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
@@ -414,8 +444,13 @@ const lv_img_dsc_t bongo_inhale = {
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BONGO_FURIOUSDOWN uint8_t bongo_furiousdown_map[] = {
 #if CONFIG_NICE_VIEW_WIDGET_INVERTED
+#if CONFIG_NICE_VIEW_WIDGET_INVERTED
+        0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
+        0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
+#else
         0x00, 0x00, 0x00, 0xff, /*Color of index 0*/
         0xff, 0xff, 0xff, 0xff, /*Color of index 1*/
+#endif
 #else
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/

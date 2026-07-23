@@ -29,6 +29,7 @@ struct status_state {
     uint8_t wpm;
     bool bongo_paw;
     bool leader_active;
+    char leader_prefix;
     uint8_t leader_count;
     uint8_t leader_cand_len;
     char leader_cands[13];
