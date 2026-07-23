@@ -62,7 +62,8 @@ static const struct ldr_item clip_items[] = {{'Y', "ank"}, {'P', "aste"}};
 static const struct ldr_item sys_items[] = {{'C', "aff"},  {'D', "nd"},   {'N', "ite"},
                                             {'E', "moji"}, {'T', "heme"}, {'L', "ock"}};
 static const struct ldr_item win_items[] = {{'O', "ver"}, {'Z', "oom"}, {'M', "ax"}};
-static const struct ldr_item pad_items[] = {{'K', "itty"}, {'E', "macs"}};
+static const struct ldr_item pad_items[] = {
+    {'K', "itty"}, {'E', "macs"}, {'S', "pot"}, {'D', "isc"}};
 
 /* one menu row: inverted key cell, then the rest of the word */
 static void draw_ldr_item(lv_obj_t *canvas, int x, int y, const struct ldr_item *item) {
@@ -120,7 +121,7 @@ static void draw_leader(lv_obj_t *canvas, const struct status_state *state) {
     case 'P':
         header = "PADS";
         items = pad_items;
-        n = 2;
+        n = 4;
         break;
     case 'V':
         header = "VIEW TAG";
