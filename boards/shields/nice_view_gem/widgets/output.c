@@ -38,10 +38,6 @@ static void draw_ble_connected(lv_obj_t *canvas) {
 }
 
 void draw_output_status(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_rect_dsc_t rect_white_dsc;
-    init_rect_dsc(&rect_white_dsc, LVGL_FOREGROUND);
-    lv_canvas_draw_rect(canvas, 43, 4, 24, 15, &rect_white_dsc);
-
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     switch (state->selected_endpoint.transport) {
     case ZMK_TRANSPORT_USB:
